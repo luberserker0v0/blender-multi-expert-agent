@@ -1,94 +1,85 @@
 # System Architecture
 
-## Current High-Level Architecture
+The active runtime is a single Agent Orchestrator-backed `multi_expert`
+pipeline. Python is the coordinator and execution authority; Agent Orchestrator
+hosts the meeting agents.
 
-The system is currently organized into these major layers:
+## Runtime Ownership
 
-- `tasks`
-  Loads task-specific checklist data and builds the task object table.
-- `schemas`
-  Defines structured state contracts such as actions, gap reports, target checklist data, and task object specs.
-- `blender`
-  Contains Blender-facing object operations, simulated backend, context reader, and MCP-backed adapter.
-- `perception`
-  Defines perception interfaces plus mock and YOLO integration paths.
-- `analysis`
-  Builds the gap report from Blender context and perception results.
-- `decision`
-  Chooses the next action using rule-based or endpoint-backed LLM logic.
-- `execution`
-  Applies actions through the selected Blender object operations backend.
-- `memory`
-  Persists session progress.
-- `output`
-  Streams Agent progress back to the user.
-- `services`
-  Contains infrastructure clients such as the LLM endpoint client and MCP client.
-- `pipelines`
-  Orchestrates the full runtime loop.
+- Agent Orchestrator owns agent sessions, moderator/subagent execution, and
+  model calls.
+- Python owns phase sequencing, AO provisioning, Markdown artifacts, todo and
+  coverage state, checkpoint/session persistence, Blender/MCP execution, and
+  validation.
+- React UI owns user interaction, settings, session navigation, activity
+  rendering, runtime log, and inspector panels.
 
-## Current Runtime Backends
+## Main Flow
 
-There are currently two Blender execution backends:
+1. User starts a task from CLI or React UI.
+2. Python creates or reuses a session runtime directory.
+3. Python provisions AO config, root `AGENTS.md`, agent markdown files, and
+   active skills.
+4. Python starts AO and waits for the conversation to become ready.
+5. Python runs Design, Spec, Plan, Build, Builder placement execution, and
+   Validate phases.
+6. Meeting phases produce Markdown handoff documents.
+7. Python maintains a thin `artifact_index.json`, todo state, and progress
+   snapshot for UI/bridge consumption.
+8. Builder returns one-step Markdown operations. Python maps these to allowed
+   Blender actions, executes through ObjectOps/MCP, and validates scene state.
 
-- simulated backend
-  Uses in-memory object state for fast MVP validation and automated tests.
-- MCP-backed backend
-  Uses `SdkClient` plus `BlenderAdapter` to drive a live Blender instance.
+## AO Agent Model
 
-The Blender operation layer now also exposes higher-level object controls needed by the staged modeling loop:
+- `moderator` is the only main-session AO route.
+- `designer`, `specifier`, `planner`, `reviewer`, `builder`, and `inspector`
+  are subagents invoked by the moderator through Task Tool delegation.
+- Subagent internal context should remain in child sessions; main session stores
+  only the final meeting utterance or builder operation.
 
-- primitive creation by primitive type
-- active-object selection
-- object hiding / unhiding
-- absolute move and rotation controls
-- targeted part capture before final assembly
+## Artifacts
 
-## Current Decision Backends
+Runtime artifacts live under:
 
-- `RuleDecisionEngine`
-  Default path for the MVP.
-- `EndpointLlmDecisionEngine`
-  Experimental path using an OpenAI-compatible endpoint such as `llama-server`.
+```text
+data/runtime/session_data/<session-id>/artifacts/
+```
 
-## Current Perception Backends
+Core files:
 
-- `MockPerceptionProvider`
-  Default path for the MVP loop.
-- `YoloPerceptionProvider`
-  Real perception path using a local YOLO model and captured image input.
+- `design.md`
+- `spec.md`
+- `build_plan.md`
+- `todo.md`
+- `build_log.md`
+- `final_report.md`
+- `artifact_index.json`
 
-The current YOLO-backed perception can preserve:
+Markdown is the agent/human source of truth. JSON exists only for Python/UI
+metadata, validation, and executable action handoff.
 
-- detected part names
-- detection confidence
-- bounding boxes
-- normalized detection centers
-- coarse bbox-derived size metrics
+## Blender Execution
 
-## Planned Extension
+The system has two execution modes:
 
-The current architecture will be extended with two new runtime responsibilities:
+- `SimulatedBlenderObjectOps` for tests and local non-Blender checks.
+- Blender MCP-backed object operations for live Blender runs.
 
-- multimodal LLM review transport for in-progress Blender screenshots
-- repeated-part instance orchestration for tasks that require more than one physical mesh instance
+Builder does not directly control Blender. It writes a single Markdown
+operation for the current todo; Python parses, validates, executes, and records
+the result.
 
-This design is documented in:
+## UI And Progress
 
-- `multimodal_review_and_multiplicity_design.md`
+The UI keeps the existing `MultiStageProgressSnapshot` wire name for
+compatibility. `workflow_type` remains `multi_stage_modeling`, and
+`multi_expert_mode` is always `true`.
 
-## Design Boundaries
+Progress and activity are exposed through the GUI bridge REST/WebSocket API.
+Conversation Surface shows short summaries by default and keeps full AO
+responses in expandable detail.
 
-- the Agent is the orchestration layer
-- Blender hosts the first  server
-- the Agent acts as the MCP client
-- LLM access remains endpoint-based for now
-- perception and decision are intentionally abstracted so they can evolve independently
-- part planning, part review, and assembly review are now separated from the older single-step decision loop
+## Deprecated Paths
 
-## Source Files
-
-- `src/ai_3d_modeling_agent/pipelines/mvp_loop.py`
-- `src/ai_3d_modeling_agent/blender/mcp_adapter.py`
-- `src/ai_3d_modeling_agent/services/mcp_client.py`
-- `src/ai_3d_modeling_agent/services/llm_endpoint.py`
+Removed pipeline variants and local expert prompting notes are not active
+runtime paths. Related docs are archived under [`archive/`](archive/index.md).

@@ -277,7 +277,7 @@ class MockActivitySocket {
     this.onclose?.(new Event('close'))
   }
 
-  send(_data: string | ArrayBufferLike | Blob | ArrayBufferView) {
+  send() {
     // UI does not send websocket messages in mock-first mode.
   }
 
@@ -581,7 +581,10 @@ export function installMcpBrowserMocks() {
       state.settings = {
         agentOrchestratorUrl: String(body.agent_orchestrator_base_url ?? state.settings.agentOrchestratorUrl),
         agentOrchestratorModel: String(body.agent_orchestrator_model ?? state.settings.agentOrchestratorModel),
-        keepAgentOrchestratorConversation: !Boolean(body.agent_orchestrator_destroy_on_finish ?? !state.settings.keepAgentOrchestratorConversation),
+        keepAgentOrchestratorConversation:
+          body.agent_orchestrator_destroy_on_finish === undefined
+            ? state.settings.keepAgentOrchestratorConversation
+            : !body.agent_orchestrator_destroy_on_finish,
         agentOrchestratorTimeoutSeconds: Number(body.agent_orchestrator_timeout_seconds ?? state.settings.agentOrchestratorTimeoutSeconds),
         maxPartRefinementRounds: Number(body.max_part_refinement_rounds ?? state.settings.maxPartRefinementRounds),
         maxAssemblyRounds: Number(body.max_assembly_rounds ?? state.settings.maxAssemblyRounds),

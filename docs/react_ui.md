@@ -6,7 +6,7 @@ This document describes the TypeScript + React + Tailwind UI workspace for the p
 
 This is now the primary UI direction for the desktop-style local app experience.
 
-The older `tkinter` GUI still exists as a fallback prototype, but the React UI is the main surface being extended.
+Older `tkinter` prototype notes are archived. The React UI is the active surface.
 
 ## Stack
 
@@ -102,15 +102,14 @@ This keeps the React rewrite aligned with:
 
 The current React UI persists common settings in browser local storage, including:
 
-- LLM endpoint URL
-- LLM model
-- part refinement round count
-- assembly round count
+- Agent Orchestrator URL
+- selected Agent Orchestrator model
+- optional Agent Orchestrator debug and timeout options
 - Blender MCP toggle
+- Blender MCP config JSON
 - YOLO validation toggle
 - YOLO model path
-- YOLO viewpoints as a legacy stored field
-- Blender MCP config JSON
+- session and workspace draft state
 
 The same settings are also saved through the bridge to:
 
@@ -125,7 +124,7 @@ The current React UI can now:
 - create a new blank session
 - delete an existing session through a confirmation modal
 - save common environment settings
-- start the `multi-stage` workflow through the existing Python CLI
+- start the AO-backed multi-expert workflow through the bridge
 - stop the spawned local run
 - stream Activity/runtime updates over WebSocket
 - fall back to snapshot polling when the socket is unavailable
@@ -226,8 +225,8 @@ Current behavior:
 - clicking **Start** automatically collapses the input grid — the conversation surface expands to fill the freed space
 - a toggle button in the header row switches between expanded (`▲ Collapse`) and collapsed (`▼ Expand Input`) states
 - when collapsed, the Composer still shows:
-  - session title and status badges (stage, workflow, activity, LLM, MCP)
-  - all action buttons (Start, Stop, Verify LLM, Inspector, Runtime Log, Open Panel)
+  - session title and status badges (stage, workflow, activity, AO, MCP)
+  - all action buttons (Start, Stop, Verify AO, Inspector, Runtime Log, Open Panel)
 - the collapse is purely a front-end layout state — it does not affect workspace content, the bridge, or the modeling backend
 - expanding the Composer again restores the full input grid with all previously entered content intact
 
@@ -281,3 +280,57 @@ Selecting a round updates the inspector-style detail pane with grouped sections 
 - the MCP runtime log is currently more detailed than the image preview layer
 - if the bridge API changes, restart `python scripts/run_ui_bridge.py` before testing the updated frontend
 - the WebSocket server is currently a small custom local implementation rather than a larger framework-backed realtime stack
+
+## Playwright E2E Levels
+
+The UI has multiple e2e levels. They should not be treated as equivalent.
+
+### Mock Bridge E2E
+
+Command:
+
+```powershell
+npm run test:e2e
+```
+
+This starts the local bridge and Vite UI with mock setup/teardown. It tests
+browser-visible UI flows against mock runtime/session state:
+
+- session creation, switching, delete, and batch delete
+- settings save/load and AO readiness UI
+- composer behavior, status chips, start/stop buttons
+- Conversation Surface activity rendering and expansion
+- retry cards, Runtime Log, Inspector, and WebSocket resync
+- responsive layout checks
+
+This level does not require real AO, a real model, Blender, or Blender MCP.
+
+### Live Bridge Smoke E2E
+
+Command:
+
+```powershell
+npm run test:e2e:live-bridge
+```
+
+This starts a real `scripts/run_ui_bridge.py` process in smoke mode and drives
+the React UI through Playwright. It verifies that UI state stays aligned with a
+real bridge process, including reload/reconnect, retry, runtime log, activity
+ordering, and multi-session recovery.
+
+This level still does not require real AO or Blender. It is intended as a local
+smoke test and is not part of GitHub CI by default.
+
+### Full Live AO / Blender E2E
+
+This level is manual/local for now. It requires:
+
+- Agent Orchestrator running
+- selected model/provider working
+- Blender running with MCP available
+- React UI and bridge started through `make run-dev`
+
+Use this level to verify that a browser-started task actually reaches AO,
+produces artifacts, executes Blender MCP operations, and validates the scene.
+Because it depends on local services and a graphical Blender session, it is not
+safe for normal GitHub CI.

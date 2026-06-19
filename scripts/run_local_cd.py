@@ -31,12 +31,16 @@ def main() -> int:
     if not args.no_clean:
         clean_outputs()
 
+    run([sys.executable, "scripts/check_docs.py"])
+    run([sys.executable, "-m", "compileall", "src", "scripts"])
+
     run([sys.executable, "-m", "pip", "install", "--upgrade", "build"])
     run([sys.executable, "-m", "build"])
 
     npm = shutil.which("npm")
     if not npm:
         raise RuntimeError("npm is required to build UI artifacts")
+    run([npm, "run", "lint"], cwd=REPO_ROOT / "ui")
     run([npm, "run", "build"], cwd=REPO_ROOT / "ui")
 
     print("\nArtifacts:")

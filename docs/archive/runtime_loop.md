@@ -1,3 +1,8 @@
+# Archived Reference
+
+This document is historical. It may describe removed runtime paths and must not
+be used as active implementation guidance.
+
 # Runtime Loop
 
 ## Current Loop Sequence

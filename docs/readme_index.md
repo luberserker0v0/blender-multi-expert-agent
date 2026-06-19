@@ -38,7 +38,6 @@ scope-specific notes when you need the current source of truth.
 - Keep root `README.md` focused on quick start and current commands.
 - Keep detailed architecture in `docs/`.
 - Keep UI-specific workflow in `ui/README.md`.
-- Do not document removed runtime entry points such as `run_mvp.py` as active
-  commands.
+- Do not document removed runtime entry points as active commands.
 - If a README references Agent Orchestrator readiness or settings, use AO
-  terminology rather than legacy LLM endpoint terminology.
+  terminology rather than removed local-model terminology.

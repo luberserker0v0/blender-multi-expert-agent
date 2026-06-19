@@ -2,12 +2,12 @@
 
 ## Current Status
 
-The project now has two perception paths:
+The project currently treats perception as optional validation support:
 
-- mock perception
-  used by the default MVP loop
-- YOLO-backed perception
-  implemented as a real provider, but not yet the default runtime path
+- mock perception for tests and local non-vision checks
+- YOLO-backed perception for live screenshot or image validation experiments
+
+YOLO is not required for the AO-backed multi-expert pipeline.
 
 ## Current YOLO Runtime Path
 

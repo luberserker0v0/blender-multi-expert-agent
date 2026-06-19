@@ -282,7 +282,10 @@ export function useWorkspaceController() {
   }, [activateSession, api, initializationState, store])
 
   useEffect(() => {
-    void initializeWorkspaceApp()
+    const initializeTimer = window.setTimeout(() => {
+      void initializeWorkspaceApp()
+    }, 0)
+    return () => window.clearTimeout(initializeTimer)
   }, [initializeWorkspaceApp])
 
   const handleSocketEnvelope = useCallback(

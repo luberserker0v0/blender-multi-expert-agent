@@ -1,83 +1,81 @@
 # Documentation Index
 
-This index is the entry point for the current project design and implementation notes.
+This is the current documentation map for the Blender multi-expert modeling
+agent. Prefer these active documents before opening archived design notes.
 
-Read this file first. It is intended to reduce unnecessary context loading by pointing readers only to the documents they need.
+## Current Read Order
 
-## Recommended Read Order
+1. [`../README.md`](../README.md)
+   Quick start, local commands, CI/CD, CLI, and React UI startup.
+2. [`readme_index.md`](readme_index.md)
+   Index of README files and their intended scope.
+3. [`system_architecture.md`](system_architecture.md)
+   Current runtime architecture and ownership boundaries.
+4. [`current_runtime_flow.md`](current_runtime_flow.md)
+   Short operational flow from UI/CLI through AO, Markdown artifacts, todos, and
+   Blender MCP execution.
+5. [`agent_orchestrator_multi_expert.md`](agent_orchestrator_multi_expert.md)
+   Agent Orchestrator provisioning, agent roles, and moderator-only routing.
+6. [`opencode_assets.md`](opencode_assets.md)
+   Active AO/OpenCode agents, skills, and provisioning rules.
+7. [`react_ui.md`](react_ui.md)
+   React UI, bridge, activity stream, settings, and runtime panels.
 
-1. `readme_index.md`
-   Use this when you want to know which README to open for each workspace area.
-2. `engineering/srs.md`
-   Use this when you want the current product scope, assumptions, and system requirements.
-3. `system_architecture.md`
-   Use this when you want the current runtime architecture and module boundaries.
-4. `agent_orchestrator_multi_expert.md`
-   Use this when you want the current AO-backed multi-expert runtime, role set, provisioning sequence, and source-of-truth assets.
-5. `react_ui.md`
-   Use this when you want the browser UI, bridge, and activity streaming flow.
+## Active Runtime Docs
 
-## By Topic
+- [`agent_orchestrator_multi_expert.md`](agent_orchestrator_multi_expert.md)
+  Source of truth for AO-backed multi-expert runtime flow.
+- [`system_architecture.md`](system_architecture.md)
+  Current high-level architecture.
+- [`current_runtime_flow.md`](current_runtime_flow.md)
+  Runtime flow diagram and responsibility map.
+- [`session_and_progress.md`](session_and_progress.md)
+  Progress snapshot, session persistence, and recovery notes.
+- [`opencode_assets.md`](opencode_assets.md)
+  AO/OpenCode asset inventory and active/deprecated skill status.
+- [`blender_mcp_integration.md`](blender_mcp_integration.md)
+  Current Blender MCP integration path.
+- [`blender_build_capabilities.md`](blender_build_capabilities.md)
+  Builder-readable build capability manifest.
+- [`blender_assembly_capabilities.md`](blender_assembly_capabilities.md)
+  Builder-readable placement/assembly capability manifest.
+- [`perception_and_yolo.md`](perception_and_yolo.md)
+  YOLO/perception notes and current limits.
 
-### Product / Scope
+## UI And Testing
 
-- `engineering/srs.md`
-  Current software requirements specification.
-- `product_overview.md`
-  Short project summary, current status, and terminology.
+- [`react_ui.md`](react_ui.md)
+  Browser UI and bridge behavior.
+- [`TEST_TASKS.md`](TEST_TASKS.md)
+  Manual/e2e task corpus.
+- [`TODO.md`](TODO.md)
+  Active follow-up work.
 
-### Architecture / Runtime
+## Decisions
 
-- `system_architecture.md`
-  Main system architecture, module responsibilities, and current design choices.
-- `agent_orchestrator_multi_expert.md`
-  Current Agent Orchestrator-backed multi-expert runtime and provisioning flow.
-- `blender_build_capabilities.md`
-  Manual capability manifest used by the builder agent and build-action validator.
-- `blender_assembly_capabilities.md`
-  Manual capability manifest used by Builder placement execution and validation.
-- `runtime_loop.md`
-  Historical runtime notes; use current code as source of truth.
-- `multimodal_review_and_multiplicity_design.md`
-  Design for LLM-reviewed process screenshots, repeated part instances such as multiple chair legs, and the future anchor-based assembly path.
-- `modeling_orchestration_prompt_design.md`
-  Design for improving task dispatch, geometry intent, screenshot review rubric, and modeling prompts for better Blender execution quality.
-- `perception_and_yolo.md`
-  Current perception design, YOLO output structure, and what the system can infer from it.
-- `session_and_progress.md`
-  Session model, progress file contract, and recovery-related TODO boundaries.
-- `gui_prototype.md`
-  Older `tkinter` GUI helper notes.
-- `react_ui.md`
-  Primary React + TypeScript + Tailwind CSS UI workspace, bridge flow, WebSocket Activity transport, reconnect behavior, and pending interaction UX.
+- [`decisions/0001-ao-moderator-only-routing.md`](decisions/0001-ao-moderator-only-routing.md)
+  Python routes AO messages only to moderator; subagents are invoked by Task Tool.
+- [`decisions/0002-markdown-first-artifacts.md`](decisions/0002-markdown-first-artifacts.md)
+  Meeting outputs are Markdown-first, with thin Python-owned metadata.
+- [`decisions/0003-single-builder-execution.md`](decisions/0003-single-builder-execution.md)
+  Builder owns both geometry and placement as one todo-driven execution role.
+- [`decisions/0004-python-owned-todo-coverage.md`](decisions/0004-python-owned-todo-coverage.md)
+  Python owns todo status, coverage, and scene-validation truth.
+- [`decisions/0005-conda-pip-python-environment.md`](decisions/0005-conda-pip-python-environment.md)
+  Python environment management remains conda + pip; `uv` is only an external
+  Blender MCP command unless a future migration supersedes this.
 
-### Blender / MCP
+## Archive
 
-- `blender_mcp_integration.md`
-  Actual MCP integration path, currently based on Blender-hosted stdio MCP plus socket-connected add-on execution.
-- `blender_adapter.md`
-  Agent-side `BlenderMcpAdapter` design and current method-to-tool mapping.
-- `blender_mcp_api_draft.md`
-  Earlier idealized API draft. Keep this for reference only; it is not the source of truth for current implementation.
+- [`archive/index.md`](archive/index.md)
+  Historical pipeline variants, tkinter prototype notes, draft MCP API notes,
+  and older prompt-design notes.
 
-### Task / Modeling State
+## Source Of Truth Rules
 
-- `task_object_table.md`
-  Task-scoped object table design, cleanup policy, and why unrelated objects are deleted before modeling.
-
-### Engineering / Process
-
-- `readme_index.md`
-  Index of README files and their intended scope.
-- `engineering/tdd.md`
-  Test strategy, current automated coverage, and near-term testing plan.
-- `testing_strategy.md`
-  Lightweight test inventory by layer and runtime target.
-- `TODO.md`
-  Open follow-up work that is not yet captured as implemented behavior.
-
-## Source Of Truth Notes
-
-- If a document conflicts with current code, the implementation under `src/` is the source of truth.
-- `blender_mcp_api_draft.md` is explicitly a draft.
-- `README.md` is for quick start and environment setup, not for full architecture detail.
+- Current implementation under `src/` wins over docs when they conflict.
+- `.opencode/` is the source of truth for AO agent and skill assets.
+- `docs/blender_*_capabilities.md` are manually maintained manifests for what
+  Builder can plan against.
+- Archived docs are for historical context only and should not be used as active
+  implementation instructions.

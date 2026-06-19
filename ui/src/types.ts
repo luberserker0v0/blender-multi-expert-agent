@@ -199,7 +199,7 @@ export interface SessionStateSnapshot {
   snapshot_generated_at: number
 }
 
-export interface ActivitySnapshotResponse extends SessionStateSnapshot {}
+export type ActivitySnapshotResponse = SessionStateSnapshot
 
 export interface BootstrapResponse {
   sessions: SessionSummary[]

@@ -29,6 +29,7 @@ def main() -> int:
     args = parser.parse_args()
 
     if not args.skip_python:
+        run([sys.executable, "scripts/check_docs.py"])
         run([sys.executable, "-m", "compileall", "src", "scripts"])
         run(
             [sys.executable, "-m", "pytest", "tests/unit", "-q"],
@@ -41,6 +42,7 @@ def main() -> int:
 
     ui_dir = REPO_ROOT / "ui"
     if not args.skip_ui:
+        run([npm, "run", "lint"], cwd=ui_dir)
         run([npm, "test"], cwd=ui_dir)
         run([npm, "run", "build"], cwd=ui_dir)
 

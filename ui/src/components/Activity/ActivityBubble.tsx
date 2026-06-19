@@ -14,6 +14,31 @@ interface ActivityBubbleProps {
   onToggleExpand: (itemId: string) => void
 }
 
+function InlineMarkdown({ children }: { children: string }) {
+  return (
+    <ReactMarkdown
+      remarkPlugins={[remarkGfm]}
+      rehypePlugins={[rehypeHighlight]}
+      components={{
+        p: ({ children }) => <span>{children}</span>,
+      }}
+    >
+      {children}
+    </ReactMarkdown>
+  )
+}
+
+function BlockMarkdown({ children }: { children: string }) {
+  return (
+    <ReactMarkdown
+      remarkPlugins={[remarkGfm]}
+      rehypePlugins={[rehypeHighlight]}
+    >
+      {children}
+    </ReactMarkdown>
+  )
+}
+
 function ActivityBubble({ item, isExpanded, onToggleExpand }: ActivityBubbleProps) {
   // ── Phase divider ──────────────────────────────────────────────
   if (item.kind === 'meeting_phase') {
@@ -38,14 +63,9 @@ function ActivityBubble({ item, isExpanded, onToggleExpand }: ActivityBubbleProp
           {item.kind}
         </span>
         {item.body && (
-          <p className="mt-1 text-center text-[11px] text-stone-500" data-testid="activity-item-body">
-              <ReactMarkdown
-                remarkPlugins={[remarkGfm]}
-                rehypePlugins={[rehypeHighlight]}
-              >
-                {item.body}
-              </ReactMarkdown>
-          </p>
+          <div className="mt-1 text-center text-[11px] text-stone-500" data-testid="activity-item-body">
+            <InlineMarkdown>{item.body}</InlineMarkdown>
+          </div>
         )}
       </div>
     )
@@ -78,36 +98,21 @@ function ActivityBubble({ item, isExpanded, onToggleExpand }: ActivityBubbleProp
               >
                 <span className="text-xs">{isExpanded ? '\u25B2' : '\u25BC'}</span>
                 <span className="flex-1" data-testid="activity-item-body">
-                  <ReactMarkdown
-                    remarkPlugins={[remarkGfm]}
-                    rehypePlugins={[rehypeHighlight]}
-                  >
-                    {item.body}
-                  </ReactMarkdown>
+                  <InlineMarkdown>{item.body}</InlineMarkdown>
                 </span>
               </button>
               {isExpanded && item.responseBody ? (
                 <div className="rounded-2xl bg-black/15 px-3 py-3" data-testid="activity-item-response">
-                  <pre className="whitespace-pre-wrap text-xs leading-5 text-white/90">
-                    <ReactMarkdown
-                      remarkPlugins={[remarkGfm]}
-                      rehypePlugins={[rehypeHighlight]}
-                    >
-                      {item.responseBody}
-                    </ReactMarkdown>
-                  </pre>
+                  <div className="whitespace-pre-wrap text-xs leading-5 text-white/90">
+                    <BlockMarkdown>{item.responseBody}</BlockMarkdown>
+                  </div>
                 </div>
               ) : null}
             </div>
           ) : (
-            <p className="text-sm leading-6 text-white" data-testid="activity-item-body">
-              <ReactMarkdown
-                remarkPlugins={[remarkGfm]}
-                rehypePlugins={[rehypeHighlight]}
-              >
-                {item.body}
-              </ReactMarkdown>
-            </p>
+            <div className="text-sm leading-6 text-white" data-testid="activity-item-body">
+              <BlockMarkdown>{item.body}</BlockMarkdown>
+            </div>
           )}
         </div>
       </article>
@@ -164,12 +169,7 @@ function ActivityBubble({ item, isExpanded, onToggleExpand }: ActivityBubbleProp
           >
             <span className="text-xs">{isExpanded ? '\u25B2' : '\u25BC'}</span>
             <span data-testid="activity-item-body">
-              <ReactMarkdown
-                remarkPlugins={[remarkGfm]}
-                rehypePlugins={[rehypeHighlight]}
-              >
-                {item.body}
-              </ReactMarkdown>
+              <InlineMarkdown>{item.body}</InlineMarkdown>
             </span>
           </button>
           {isExpanded && item.responseBody ? (
@@ -177,26 +177,16 @@ function ActivityBubble({ item, isExpanded, onToggleExpand }: ActivityBubbleProp
               <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
                 {isDeliberationStep ? 'Deliberation Detail' : '\u5B8C\u6574 AO \u56DE\u8986'}
               </p>
-              <pre className="whitespace-pre-wrap text-xs leading-5 text-slate-700">
-                <ReactMarkdown
-                  remarkPlugins={[remarkGfm]}
-                  rehypePlugins={[rehypeHighlight]}
-                >
-                  {item.responseBody}
-                </ReactMarkdown>
-              </pre>
+              <div className="whitespace-pre-wrap text-xs leading-5 text-slate-700">
+                <BlockMarkdown>{item.responseBody}</BlockMarkdown>
+              </div>
             </div>
           ) : null}
         </div>
       ) : (
-        <p className={`text-sm leading-6 ${isDeliberationStep ? 'text-slate-600' : ''}`} data-testid="activity-item-body">
-          <ReactMarkdown
-            remarkPlugins={[remarkGfm]}
-            rehypePlugins={[rehypeHighlight]}
-          >
-            {item.body}
-          </ReactMarkdown>
-        </p>
+        <div className={`text-sm leading-6 ${isDeliberationStep ? 'text-slate-600' : ''}`} data-testid="activity-item-body">
+          <BlockMarkdown>{item.body}</BlockMarkdown>
+        </div>
       )}
     </article>
   )

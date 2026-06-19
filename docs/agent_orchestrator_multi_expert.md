@@ -56,9 +56,9 @@ flow.
 
 ## Runtime Rules
 
-The active runtime does not call a local OpenAI-compatible LLM endpoint directly.
-Legacy LLM settings may be parsed for compatibility, but they do not drive
-`run_pipeline`. If AO health, provisioning, start, readiness polling, or
-`message.send` fails, the run fails fast rather than falling back to a local LLM.
+The active runtime does not call a local model service directly. Legacy model
+settings may be parsed for compatibility, but they do not drive `run_pipeline`.
+If AO health, provisioning, start, readiness polling, or `message.send` fails,
+the run fails fast rather than falling back to local expert prompting.
 All AO messages are routed to `moderator`; subagents are invoked through the
 moderator's Task Tool rather than by Python switching the main session agent.

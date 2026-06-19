@@ -31,25 +31,30 @@ export default function useActivitySocket({
   onMeetingEvent,
   onPoll,
 }: UseActivitySocketParams): { activitySocketState: ActivitySocketState } {
-  const [activitySocketState, setActivitySocketState] = useState<ActivitySocketState>('connecting')
+  const [activitySocketState, setActivitySocketState] = useState<ActivitySocketState>(() =>
+    currentSessionId ? 'connecting' : 'fallback',
+  )
   const activitySocketRef = useRef<WebSocket | null>(null)
 
   // Store callbacks in refs so the effect doesn't depend on them directly.
   const onEventRef = useRef(onEvent)
-  onEventRef.current = onEvent
   const onActivitySnapshotRef = useRef(onActivitySnapshot)
-  onActivitySnapshotRef.current = onActivitySnapshot
   const onMeetingEventRef = useRef(onMeetingEvent)
-  onMeetingEventRef.current = onMeetingEvent
   const onPollRef = useRef(onPoll)
-  onPollRef.current = onPoll
+
+  useEffect(() => {
+    onEventRef.current = onEvent
+    onActivitySnapshotRef.current = onActivitySnapshot
+    onMeetingEventRef.current = onMeetingEvent
+    onPollRef.current = onPoll
+  }, [onEvent, onActivitySnapshot, onMeetingEvent, onPoll])
 
   useEffect(() => {
     if (!currentSessionId) {
       activitySocketRef.current?.close()
       activitySocketRef.current = null
-      setActivitySocketState('fallback')
-      return
+      const stateTimer = window.setTimeout(() => setActivitySocketState('fallback'), 0)
+      return () => window.clearTimeout(stateTimer)
     }
 
     let disposed = false

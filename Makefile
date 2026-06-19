@@ -1,6 +1,6 @@
 PYTHON ?= python
 
-.PHONY: install test ci cd run run-stream run-dev
+.PHONY: install test docs-check ci cd run run-stream run-dev
 
 install:
 	$(PYTHON) -m pip install --upgrade pip
@@ -8,6 +8,9 @@ install:
 
 test:
 	PYTHONPATH=src $(PYTHON) -m pytest tests/unit -q
+
+docs-check:
+	$(PYTHON) scripts/check_docs.py
 
 ci:
 	$(PYTHON) scripts/run_local_ci.py

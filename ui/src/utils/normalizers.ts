@@ -545,9 +545,10 @@ export function mapApiSettingsToUi(
     agentOrchestratorModel: String(
       payload.agent_orchestrator_model ?? defaultSettings.agentOrchestratorModel,
     ),
-    keepAgentOrchestratorConversation: !Boolean(
-      payload.agent_orchestrator_destroy_on_finish ?? !defaultSettings.keepAgentOrchestratorConversation,
-    ),
+    keepAgentOrchestratorConversation:
+      payload.agent_orchestrator_destroy_on_finish === undefined
+        ? defaultSettings.keepAgentOrchestratorConversation
+        : payload.agent_orchestrator_destroy_on_finish ? false : true,
     agentOrchestratorTimeoutSeconds: Number(
       payload.agent_orchestrator_timeout_seconds ?? defaultSettings.agentOrchestratorTimeoutSeconds,
     ),

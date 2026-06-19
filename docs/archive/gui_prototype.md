@@ -1,10 +1,16 @@
+# Archived Reference
+
+This document is historical. It may describe removed runtime paths and must not
+be used as active implementation guidance.
+
 # GUI Prototype
 
 ## Purpose
 
 This document explains how to start and use the older local `tkinter` GUI prototype for the multi-stage modeling workflow.
 
-This document is kept for reference and fallback use. The primary UI direction is now the React workspace described in [react_ui.md](</D:/program/Projects/Blender 3DModel Agent/repo/docs/react_ui.md>).
+This document is kept for reference. The active UI direction is now the React
+workspace described in [`../react_ui.md`](../react_ui.md).
 
 The current `tkinter` GUI is intended for:
 

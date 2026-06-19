@@ -50,7 +50,7 @@ For the newer multi-stage modeling workflow, the progress file now uses a more e
 ### Multi-Stage Schema Intent
 
 - `workflow_type`
-  Distinguishes this file from the older MVP iteration loop. Current value: `multi_stage_modeling`.
+  Kept as the stable UI workflow discriminator. Current value: `multi_stage_modeling`.
 - `status`
   Top-level run state such as `running`, `completed`, or `failed`.
 - `stage`

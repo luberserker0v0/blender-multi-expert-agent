@@ -7,7 +7,9 @@ const defaultProgress = createEmptyProgress()
 
 function stripLlmFields(snapshot: MultiStageProgressSnapshot): MultiStageProgressSnapshot {
   // Snapshot comparison ignores optional LLM fields we don't set in tests
-  const { llm_prompt_events, planning_llm_prompt_preview, ...rest } = snapshot
+  const rest = { ...snapshot }
+  delete rest.llm_prompt_events
+  delete rest.planning_llm_prompt_preview
   return rest
 }
 

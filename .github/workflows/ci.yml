@@ -34,6 +34,9 @@ jobs:
           python -m pip install -r requirements.txt
           python -m pip install pytest
 
+      - name: Check documentation
+        run: python scripts/check_docs.py
+
       - name: Compile Python
         run: python -m compileall src scripts
 
@@ -64,6 +67,9 @@ jobs:
 
       - name: Install UI dependencies
         run: npm ci
+
+      - name: Lint UI
+        run: npm run lint
 
       - name: Run UI unit tests
         run: npm test

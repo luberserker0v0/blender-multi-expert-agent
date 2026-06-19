@@ -38,38 +38,6 @@ const DEFAULT_MCP_STATUS: McpConnectionStatus = {
   server_name: 'blender',
 }
 
-function createEmptyProgress(): MultiStageProgressSnapshot {
-  return {
-    workflow_type: 'multi_stage_modeling',
-    status: 'idle',
-    task: '',
-    stage: 'idle',
-    stage_status: 'waiting_for_prompt',
-    planning_llm_prompt_preview: '',
-    llm_prompt_events: [],
-    active_task_id: '',
-    completed_task_ids: [],
-    part_tasks: [],
-    assembly: {
-      status: 'pending',
-      current_round: 0,
-      approved: false,
-      all_parts_visible: false,
-      initial_placement_applied: false,
-      rounds: [],
-    },
-    final_validation: {
-      status: 'pending',
-      capture_path: '',
-      viewpoint: 'front',
-      detected_parts: [],
-      missing_critical_parts: [],
-      quantitative_metrics: [],
-    },
-    stop_reason: '',
-  }
-}
-
 function createDefaultRetryPrompt(sessionId: string): RetryPromptState {
   return {
     show: false,
@@ -426,7 +394,10 @@ export async function mockBridgeApi(page: Page): Promise<MockBridgeController> {
       state.settings = {
         agentOrchestratorUrl: String(body?.agent_orchestrator_base_url ?? state.settings.agentOrchestratorUrl),
         agentOrchestratorModel: String(body?.agent_orchestrator_model ?? state.settings.agentOrchestratorModel),
-        keepAgentOrchestratorConversation: !Boolean(body?.agent_orchestrator_destroy_on_finish ?? !state.settings.keepAgentOrchestratorConversation),
+        keepAgentOrchestratorConversation:
+          body?.agent_orchestrator_destroy_on_finish === undefined
+            ? state.settings.keepAgentOrchestratorConversation
+            : !body.agent_orchestrator_destroy_on_finish,
         agentOrchestratorTimeoutSeconds: Number(body?.agent_orchestrator_timeout_seconds ?? state.settings.agentOrchestratorTimeoutSeconds),
         maxPartRefinementRounds: Number(body?.max_part_refinement_rounds ?? state.settings.maxPartRefinementRounds),
         maxAssemblyRounds: Number(body?.max_assembly_rounds ?? state.settings.maxAssemblyRounds),

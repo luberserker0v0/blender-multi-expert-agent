@@ -1,4 +1,4 @@
-import { existsSync, copyFileSync, writeFileSync } from 'fs'
+import { existsSync, copyFileSync, mkdirSync, writeFileSync } from 'fs'
 import { fileURLToPath } from 'url'
 import path from 'path'
 
@@ -10,6 +10,8 @@ async function globalSetup() {
   const runtimeGuiDir = path.join(repoRoot, 'data', 'runtime', 'gui')
   const savedSettingsPath = path.join(runtimeGuiDir, 'saved_settings.json')
   const savedSettingsBackup = path.join(runtimeGuiDir, 'saved_settings.json.e2e-backup')
+
+  mkdirSync(runtimeGuiDir, { recursive: true })
 
   if (existsSync(savedSettingsPath)) {
     copyFileSync(savedSettingsPath, savedSettingsBackup)
