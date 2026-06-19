@@ -1,5 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
+const pythonCommand = process.env.AI3D_E2E_PYTHON || process.env.PYTHON || 'python';
+
 export default defineConfig({
   testDir: './e2e',
   testIgnore: /live-bridge-.*\.spec\.ts/,
@@ -16,7 +18,7 @@ export default defineConfig({
   },
   webServer: [
     {
-      command: 'C:/Users/berserker/anaconda3/python.exe scripts/run_ui_bridge.py',
+      command: `${pythonCommand} scripts/run_ui_bridge.py`,
       cwd: '../',
       url: 'http://127.0.0.1:8765/api/bootstrap',
       reuseExistingServer: !process.env.CI,
