@@ -6,13 +6,15 @@ Read this file first. It is intended to reduce unnecessary context loading by po
 
 ## Recommended Read Order
 
-1. `engineering/srs.md`
+1. `readme_index.md`
+   Use this when you want to know which README to open for each workspace area.
+2. `engineering/srs.md`
    Use this when you want the current product scope, assumptions, and system requirements.
-2. `system_architecture.md`
+3. `system_architecture.md`
    Use this when you want the current runtime architecture and module boundaries.
-3. `agent_orchestrator_multi_expert.md`
+4. `agent_orchestrator_multi_expert.md`
    Use this when you want the current AO-backed multi-expert runtime, role set, provisioning sequence, and source-of-truth assets.
-4. `react_ui.md`
+5. `react_ui.md`
    Use this when you want the browser UI, bridge, and activity streaming flow.
 
 ## By Topic
@@ -65,6 +67,8 @@ Read this file first. It is intended to reduce unnecessary context loading by po
 
 ### Engineering / Process
 
+- `readme_index.md`
+  Index of README files and their intended scope.
 - `engineering/tdd.md`
   Test strategy, current automated coverage, and near-term testing plan.
 - `testing_strategy.md`

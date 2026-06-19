@@ -28,7 +28,10 @@ htmlcov/
 data/runtime/
 src/data/runtime/
 session_data/
-models/
+models/*
+!models/yolo/
+models/yolo/*
+!models/yolo/README.md
 outputs/
 captures/
 screenshots/

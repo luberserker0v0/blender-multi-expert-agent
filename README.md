@@ -2,12 +2,14 @@
 
 Implementation workspace for the Blender-based multi-expert 3D modeling agent.
 
-The executable pipeline is now the `multi_expert` pipeline only. It runs the
-Design, Spec, Plan, Build, Builder placement execution, and Validate phases and
-writes progress in the existing `multi_stage_modeling` UI snapshot format.
+The executable runtime is the Agent Orchestrator-backed `multi_expert`
+pipeline. It runs Design, Spec, Plan, Build, Builder placement execution, and
+Validate phases while keeping the existing `multi_stage_modeling` UI snapshot
+wire format.
 
-Detailed design and engineering documents are organized under [docs/index.md](</D:/program/Projects/Blender 3DModel Agent/repo/docs/index.md>).
-High-level project specification is organized under [spec/index.md](</D:/program/Projects/Blender 3DModel Agent/spec/index.md>).
+Detailed design and engineering documents are organized under
+[docs/index.md](docs/index.md). README files are indexed in
+[docs/readme_index.md](docs/readme_index.md).
 
 ## Environment Setup
 
@@ -15,7 +17,7 @@ From `repo/`:
 
 ```powershell
 conda env create -f environment.yml
-conda activate ai3d
+conda activate ai3d-stage2
 make install
 ```
 
@@ -59,7 +61,9 @@ The smoke writes `design.md`, `spec.md`, `build_plan.md`, `todo.md`,
 Useful make targets:
 
 - `make install`: install Python dependencies
-- `make test`: run Python test discovery
+- `make test`: run Python unit tests
+- `make ci`: run local CI checks
+- `make cd`: build local release artifacts
 - `make run`: run a default multi-expert task
 - `make run-dev`: start the React UI bridge and Vite frontend
 
@@ -95,9 +99,12 @@ Frontend commands from `ui/`:
 
 ```powershell
 npm test
+npm run ci
 npm run test:e2e
 ```
 
 ## Current Focus
 
-Open follow-up work is tracked in [docs/TODO.md](</D:/program/Projects/Blender 3DModel Agent/repo/docs/TODO.md>), with emphasis on Markdown artifact quality, checkpoint/resume, Blender capture population, and review/refinement quality in the multi-expert pipeline.
+Open follow-up work is tracked in [docs/TODO.md](docs/TODO.md), with emphasis
+on Markdown artifact quality, checkpoint/resume, Blender capture population,
+and review/refinement quality in the multi-expert pipeline.
