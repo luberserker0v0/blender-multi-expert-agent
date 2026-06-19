@@ -1,0 +1,8 @@
+{
+  "target_object_class": "apple",
+  "global_metrics": {
+    "expected_bounding_box_ratio": [1.5, 1.5, 1.5],
+    "max_polygon_count_limit": 5000
+  },
+  "critical_parts_checklist": []
+}

@@ -1,0 +1,10 @@
+{
+  "detected_parts": ["apple_body"],
+  "missing_critical_parts": [],
+  "quantitative_metrics": [
+    {
+      "part_name": "apple_body",
+      "current_bounding_box_ratio": [1.0, 1.0, 1.0]
+    }
+  ]
+}

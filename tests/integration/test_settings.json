@@ -1,0 +1,7 @@
+{
+  "llm_endpoint_url": "",
+  "llm_model": "test-model",
+  "use_blender_mcp": false,
+  "task": "build a simple chair",
+  "session_id": "test-e2e-session"
+}

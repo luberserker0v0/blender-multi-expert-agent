@@ -1,0 +1,4 @@
+# Base runtime dependencies for the current MVP foundation.
+-e .
+mcp
+ultralytics>=8.3
