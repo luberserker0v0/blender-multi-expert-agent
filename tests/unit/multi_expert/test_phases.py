@@ -64,7 +64,7 @@ def test_spec_phase_runs(mock_llm):
     assert mock_llm.call_count >= 4
 
 
-def test_spec_phase_persists_coverage_gap_for_missing_part(mock_llm):
+def test_spec_phase_persists_markdown_first_coverage_state(mock_llm):
     phase = SpecPhase()
     registry = _meeting_registry(Specifier, Reviewer)
     design = DesignArtifact(
@@ -74,7 +74,7 @@ def test_spec_phase_persists_coverage_gap_for_missing_part(mock_llm):
             {"name": "leg", "instance_count": 4},
         ],
     )
-    mock_llm.fixed_response = '{"parts":{"seat":{"primitive":"cube","target_bbox":{}}},"validation_notes":[],"summary":"seat only"}'
+    mock_llm.fixed_response = "Proposal: Define the current target with simple cube geometry and preserve its count."
 
     with tempfile.TemporaryDirectory() as tmp_dir:
         result = phase.run(
@@ -86,16 +86,11 @@ def test_spec_phase_persists_coverage_gap_for_missing_part(mock_llm):
         state = json.loads(session_meeting_state_path(Path(tmp_dir), "coverage-spec", "spec").read_text(encoding="utf-8"))
 
     assert state["coverage_todos"]
-    assert state["coverage_summary"]["counts"]["missing"] > 0
-    assert "coverage_gap" in state["phase_quality_flags"]
-    assert state["phase_status"] == "needs_revision"
-    assert state["revision_requests"]
-    assert state["clarification_requests"]
-    assert any(request["target_name"] == "leg" for request in state["revision_requests"])
-    assert any(request["target_name"] == "leg" for request in state["clarification_requests"])
-    assert any("leg" in issue["summary"] for issue in state["open_issues"])
-    assert any("leg" in note for note in result.validation_notes)
-    assert any("leg" in note for note in result.failure_notes)
+    assert state["coverage_summary"]["total"] == 6
+    assert state["todo_groups"]
+    assert {group["target_name"] for group in state["todo_groups"]} == {"leg", "seat"}
+    assert set(result.parts) == {"leg", "seat"}
+    assert result.parts["leg"]["instance_count"] == 4
 
 
 def test_spec_phase_preserves_design_instance_counts_in_extracted_parts():
@@ -107,24 +102,21 @@ def test_spec_phase_preserves_design_instance_counts_in_extracted_parts():
     assert result.parts["leg"]["instance_count"] == 4
 
 
-def test_spec_phase_without_structured_geometry_keeps_coverage_gap():
-    class RevisionClearsGapLLM:
+def test_spec_phase_without_structured_geometry_uses_markdown_first_flow():
+    class MarkdownFirstSpecLLM:
         def __init__(self) -> None:
             self.extractions = 0
 
         def call(self, system_prompt="", messages=None, response_model=None, sampling=None, **kwargs):
             if kwargs.get("skill") == "extract-spec-artifact":
                 self.extractions += 1
-                if self.extractions == 1:
-                    return '{"parts":{"leg":{"primitive":"cube","instance_count":4,"target_bbox":{}}},"validation_notes":[],"summary":"missing geometry"}'
-                return '{"parts":{"leg":{"primitive":"cube","geometry_source":"accepted","instance_count":4,"target_bbox":{"width":0.1,"depth":0.1,"height":0.8}}},"validation_notes":[],"summary":"fixed geometry"}'
             if kwargs.get("agent") == "moderator" and kwargs.get("context", {}).get("meeting_turn_kind") == "resolution":
                 return "Decision: Accept focused correction.\nAccepted:\n- Define leg geometry.\nRejected:\n- None.\nOpen Issues:\nNone"
             return "Proposal: Define focused leg geometry.\nRationale: Use a simple cube bbox."
 
     phase = SpecPhase()
     registry = _meeting_registry(Specifier, Reviewer)
-    llm = RevisionClearsGapLLM()
+    llm = MarkdownFirstSpecLLM()
     design = DesignArtifact(parts=[{"name": "leg", "instance_count": 4}])
 
     with tempfile.TemporaryDirectory() as tmp_dir:
@@ -137,10 +129,9 @@ def test_spec_phase_without_structured_geometry_keeps_coverage_gap():
         state = json.loads(session_meeting_state_path(Path(tmp_dir), "coverage-spec-revision-clear", "spec").read_text(encoding="utf-8"))
 
     assert llm.extractions == 0
-    assert any("Coverage gap for leg" in note for note in result.failure_notes)
-    assert state["revision_requests"]
-    assert state["clarification_requests"]
-    assert state["coverage_summary"]["complete"] is False
+    assert "leg" in result.parts
+    assert state["coverage_todos"]
+    assert state["coverage_summary"]["total"] == 3
 
 
 def test_spec_phase_rejects_assumed_geometry_by_default():
@@ -722,11 +713,16 @@ def test_design_phase_round_shape(mock_llm):
 
     phase.run(registry, context={}, llm=mock_llm, task_prompt="build a chair")
 
-    assert mock_llm.call_count == 4
-    assert mock_llm.agents[:4] == ["moderator", "moderator", "moderator", "moderator"]
+    non_summary = [
+        (agent, context)
+        for agent, context in zip(mock_llm.agents, mock_llm.contexts)
+        if not isinstance(context, dict) or context.get("meeting_turn_kind") != "summary"
+    ]
+    assert len(non_summary) == 4
+    assert [agent for agent, _ in non_summary] == ["moderator", "moderator", "moderator", "moderator"]
     assert [
         context.get("agent_role") if isinstance(context, dict) else ""
-        for context in mock_llm.contexts[:4]
+        for _, context in non_summary
     ] == ["designer", "reviewer", "designer", "moderator"]
 
 
@@ -769,13 +765,18 @@ def test_design_phase_skips_response_when_reviewer_has_no_blocking_issue():
     result = phase.run(registry, context={}, llm=llm, task_prompt="build a chair")
 
     assert isinstance(result, DesignArtifact)
-    assert [context.get("meeting_turn_kind") for context in llm.contexts if isinstance(context, dict)] == [
+    non_summary_contexts = [
+        context
+        for context in llm.contexts
+        if isinstance(context, dict) and context.get("meeting_turn_kind") != "summary"
+    ]
+    assert [context.get("meeting_turn_kind") for context in non_summary_contexts] == [
         "proposal",
         "challenge",
         "resolution",
     ]
-    assert llm.call_count == 3
-    assert llm.skills == ["", "", ""]
+    assert len(non_summary_contexts) == 3
+    assert [skill for skill in llm.skills if skill != "summarize-meeting-message"] == ["", "", ""]
 
 
 def test_moderated_phase_routes_sampling_policy(mock_llm):
@@ -785,7 +786,12 @@ def test_moderated_phase_routes_sampling_policy(mock_llm):
 
     phase.run(registry, context={}, llm=mock_llm, task_prompt="build a chair")
 
-    assert [sampling.temperature for sampling in mock_llm.samplings[:4]] == [
+    non_summary_samplings = [
+        sampling
+        for sampling, context in zip(mock_llm.samplings, mock_llm.contexts)
+        if not isinstance(context, dict) or context.get("meeting_turn_kind") != "summary"
+    ]
+    assert [sampling.temperature for sampling in non_summary_samplings[:4]] == [
         DEFAULT_MULTI_EXPERT_SAMPLING_POLICY.proposal_by_role["designer"].temperature,
         DEFAULT_MULTI_EXPERT_SAMPLING_POLICY.challenge_by_role["reviewer"].temperature,
         DEFAULT_MULTI_EXPERT_SAMPLING_POLICY.response_by_role["designer"].temperature,
